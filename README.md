@@ -1,10 +1,12 @@
 # movie-recom-pipeline-azure
 
 ## Overview
-This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. 
-* Datasets from ([Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
-* Store the data in ([Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs)) with variety ways of replication and storage type).
-* Orchestration the data in ([Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs)) with variety ways of replication and storage type.
+This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. (
+* Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
+* Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs) with variety ways of replication and storage type.
+*Transformation using Azure Databricks which run the Apache Spark open-source big data processing engine [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks).
+* Orchestration the data in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
+* And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview) for running automated workflows with little to no code, typically in this project is send email for you about the recommendation about movies, [Key Vault](https://azure.microsoft.com/en-us/products/key-vault) for storaging you indentify secrets.
 
 Thousands of organizations around the world generate, enhance, and model behavioral data with Snowplow to fuel [advanced analytics](https://snowplowanalytics.com/advanced-analytics/?utm_source=github&utm_content=main-repo), [AI/ML initiatives](https://snowplowanalytics.com/ai-ml/?utm_source=github&utm_content=main-repo), or [composable CDPs](https://snowplowanalytics.com/composable-cdp/?utm_source=github&utm_content=main-repo).
 
