@@ -4,7 +4,7 @@
 This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. 
 * Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
 * Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs) with variety ways of replication and storage type.
-*Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks) which run the Apache Spark open-source big data processing engine .
+* Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks) which run the Apache Spark open-source big data processing engine .
 * Orchestration the data in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
 * And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview) for running automated workflows with little to no code, typically in this project is send email for you about the recommendation about movies, [Key Vault](https://azure.microsoft.com/en-us/products/key-vault) for storaging you indentify secrets.
 
