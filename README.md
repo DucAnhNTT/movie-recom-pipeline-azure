@@ -1,7 +1,7 @@
-# movie-recom-pipeline-azure
+![](./Images/movieRecImg.svg)
 
 ## Overview
-This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. (
+This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. 
 * Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
 * Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs) with variety ways of replication and storage type.
 *Transformation using Azure Databricks which run the Apache Spark open-source big data processing engine [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks).
