@@ -8,229 +8,424 @@ This is a project using Azure services for building a complete Data pipeline for
 * Orchestration the data in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory) a cloud-based data integration service that allows you to create data-driven workflows in the cloud.
 * And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview) for running automated workflows with little to no code, typically in this project is send email for you about the recommendation about movies, [Key Vault](https://azure.microsoft.com/en-us/products/key-vault) for storaging you indentify secrets.
 
-Thousands of organizations around the world generate, enhance, and model behavioral data with Snowplow to fuel [advanced analytics](https://snowplowanalytics.com/advanced-analytics/?utm_source=github&utm_content=main-repo), [AI/ML initiatives](https://snowplowanalytics.com/ai-ml/?utm_source=github&utm_content=main-repo), or [composable CDPs](https://snowplowanalytics.com/composable-cdp/?utm_source=github&utm_content=main-repo).
-
 ### Table of contents
 
-* [Why Snowplow?](#why-snowplow)
-* [Where to start?](#-where-to-start-%EF%B8%8F)
+* [Why Azure?](#why-azure)
+* [Design](#Design)
 * [Snowplow technology 101](#snowplow-technology-101)
 * [Version compatibility matrix](#version-compatibility-matrix)
 * [About this umbrella repository](#about-this-repository)
 * [Public roadmap](#public-roadmap)
 * [Community](#community)
 
-### Why Snowplow?
+### Why Azure?
 
-* 🏔️ **Rock solid architecture** capable of processing billions of events per day.
-* 🛠️ **Over [20 SDKs](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/?utm_source=github&utm_content=main-repo)** to collect data from web, mobile, server-side, and other sources.
-* ✅ A unique approach based on **[schemas and validation](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/understanding-schemas-and-validation/?utm_source=github&utm_content=main-repo)** ensures your data is as clean as possible.
-* 🪄 **Over [15 enrichments](https://docs.snowplowanalytics.com/docs/enriching-your-data/available-enrichments/?utm_source=github&utm_content=main-repo)** to get the most out of your data.
-* 🏭 Send data to **popular warehouses and streams** — Snowplow fits nicely within the [Modern Data Stack](https://snowplowanalytics.com/blog/2021/05/12/modern-data-stack/?utm_source=github&utm_content=main-repo).
+*  For me it kind of simple because [Azure](https://azure.microsoft.com/en-us/free/students) gives free credits for new user, and can access all the services (In this project i use my email of my university and get free $100 credits without Visa or debit card, but you have to use your external email, not organization and verify by you org email, i have to spend somedays to figure it out, and don't use Databricks community for purpose of this project)
+* Plenty of resources to learn from, 
 
-### ➡ Where to start? ⬅️
+## Design
 
-| [Snowplow Open Source](https://snowplowanalytics.com/snowplow-open-source/?utm_source=github&utm_content=main-repo)  | [Snowplow Behavioral Data Platform](https://snowplowanalytics.com/snowplow-bdp/?utm_source=github&utm_content=main-repo) |
-| ------------- | ------------- |
-| Our Open Source solution equips you with everything you need to start creating behavioral data in a high-fidelity, machine-readable way. Head over to the [Quick Start Guide](https://docs.snowplowanalytics.com/docs/open-source-quick-start/what-is-the-quick-start-for-open-source/?utm_source=github&utm_content=main-repo) to set things up. | Looking for an enterprise solution with a console, APIs, data governance, workflow tooling? The Behavioral Data Platform is our managed service that runs in **your** AWS or GCP cloud. Check out [Try Snowplow][try-snowplow]. |
+### 3.1 Directory tree
 
-The [documentation](https://docs.snowplowanalytics.com/?utm_source=github&utm_content=main-repo) is a great place to learn more, especially:
+![](./images/directory_tree.png)
 
-* [Tracking design](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/?utm_source=github&utm_content=main-repo) — discover how to approach creating your data the Snowplow way.
-* [Pipelines](https://docs.snowplowanalytics.com/docs/understanding-your-pipeline/?utm_source=github&utm_content=main-repo) — understand what’s under the hood of Snowplow.
+- `app`: The UI's application written with streamlit
+- `dagster_home`: Dagit and dagster daemon's configurations
+- `dataset`: Dataset under .csv format, in order to load into MySQL
+- `docker-compose`: To compose docker containers
+- `dockerimages`: Include self-built docker images, such as dagster (for dagit + daemon), spark master, streamlit app, ...
+- `EDA.ipynb`: Exploratory Data Analysis, view directly [here](https://gist.github.com/lelouvincx/a88fa6caf59d7ff76086ab485ecc69bd)
+- `elt_pipeline`: The pipeline
+  - `dbt_transform`: dbt's code location, used for the last transform step
+  - `Dockerfile + requirements.txt`: Docker image
+  - `elt_pipeline`: EL (Extract -> Transform) pipeline
+- `.env + .spark_master.env + .spark_worker.env`: Env variables (e.g POSTGRES_USER, MYSQL_USER, SPARK, ...)
+- `env.template`: Env variables template
+- `.git + .gitignore`: Code versioning
+- `Makefile`: Shortcut for terminal's commands
+- `load_dataset`: .sql scripts to create schema and load `dataset` into MySQL, Postgres
+- `requirements.txt + Pipfile + Pipfile.lock`: Python's dependencies
 
-Would rather dive into the code? Then you are already in the right place!
+In addition, the containers also have their own separate directories, which include:
 
----
+- `minio`
+- `storage`
+  - `mysql_data`
+  - `postgres_data`
+  - `metabase_data`
 
-## Snowplow technology 101
+Visit file [tree.txt](https://github.com/lelouvincx/goodreads-elt-pipeline/blob/main/tree.txt) for more details.
 
-[![Snowplow architecture][architecture-image]][architecture]
+### 3.2 Pipeline design
 
-The repository structure follows the conceptual architecture of Snowplow, which consists of six loosely-coupled sub-systems connected by five standardized data protocols/formats.
+![](./images/design_pipeline.png "Pipeline Design")
 
-To briefly explain these six sub-systems:
+0. We use docker to containerize the application and dagster to orchestrate assets (as defined in dagster's [documentation](https://docs.dagster.io/concepts/assets/software-defined-assets)).
+1. Goodreads data is downloaded from Kaggle in `.csv` format, then imported into `MySQL` to simulate development data
+2. After obtaining the book's ISBN (international standard book number), collect additional data from relevant APIs:
+   - Genre, author, pages number, image, description from `OpenLibrary API`
+   - Download link from `Notion API`
+   - Epub file from `Google Drive API`
+   - Image from `OpenLibrary API` or `Google Drive API`
+3. Extract the table-formatted data above using `polars`, and load it into the datalake - `MinIO`.
+4. From `MinIO`, load data into `spark` to transform from raw into silver & gold
+5. Convert `Spark DataFrame` to `.parquet`, and load back to `MinIO`
+6. Load gold layer into data warehouse - postgreSQL, creating the warehouse layer.
+7. Transform as needed using `dbt` on `postgres`
+8. Visualize the data using `metabase`
+9. Create a book recommendation app using `streamlit`
 
-* **[Trackers][trackers]** fire Snowplow events. Currently we have 15 trackers, covering web, mobile, desktop, server and IoT
-* **[Collector][collector]** receives Snowplow events from trackers. Currently we have one official collector implementation with different sinks: Amazon Kinesis, Google PubSub, Amazon SQS, Apache Kafka and NSQ
-* **[Enrich][enrich]** cleans up the raw Snowplow events, enriches them and puts them into storage. Currently we have several implementations, built for different environments (GCP, AWS, Apache Kafka) and one core library
-* **[Storage][storage]** is where the Snowplow events live. Currently we store the Snowplow events in a flat file structure on S3, and in the Redshift, Postgres, Snowflake and BigQuery databases
-* **[Data modeling][data-modeling]** is where event-level data is joined with other data sets and aggregated into smaller data sets, and business logic is applied. This produces a clean set of tables which make it easier to perform analysis on the data. We officially support data models for Redshift, Snowflake and BigQuery.
-* **[Analytics][analytics-sdks]** are performed on the Snowplow events or on the aggregate tables.
+### 3.3 Database schema
 
-**For more information on the current Snowplow architecture, please see the [Technical architecture][architecture]**.
+![](./images/design_schema.png)
 
-### Version Compatibility Matrix
+1. `book`: OLTP table contains books' infomation (e.g ISBN, Authors, Rating, Description...)
+2. `genre`: table contains genres
+3. `book_genre`: n-n relationship of `book` and `genre`
+4. `book_download_link`: table contains link google drive
+5. `files`: object storage contains books' download files (.epub/.pdf/.mobi)
+6. `images`: object storage contains books' images
 
-To make sure all the components work well together, we strongly recommended you take a look at the [compatibility matrix][version-compatibility] when setting up a Snowplow pipeline.
+### 3.4 Datalake structure
 
----
+![](./images/datalake_structure.png "Datalake Structure")
 
-## About this repository
+1. The datalake is divided into three layers: bronze, silver, and gold.
+2. All files are under the .parquet format for better reading performance than .csv.
+3. There are also `files` that stores .epub files in the format of abc.epub, where abc is the ISBN of the book.
+4. Similarly, abc.jpeg stores the image of the book.
 
-This repository is an umbrella repository for all loosely-coupled Snowplow components and is updated on each component release.
+### 3.5 Data lineage
 
-Since June 2020, all components have been extracted into their dedicated repositories (more info [here][split-blogpost])
-and this repository serves as an entry point for Snowplow users, the home of our public roadmap and as a historical artifact.
+1. General
 
-Components that have been extracted to their own repository are still here as [git submodules][submodules].
+![](./images/assets_general.png)
 
-### Trackers
+With a dense data lineage, Dagster is a big help when it comes to visualizing it in a clear way:
 
-A full list of supported trackers can be found [on our documentation site](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/). Popular trackers and use cases include:
+- Data originates from MySQL and various APIs, and is loaded into the bronze layer.
+- From the bronze layer, data is deduped, cleaned, and missing values are filled in the silver layer.
+- Advanced computations and splitting are then performed in the gold layer.
+- The data is loaded into the data warehouse - Postgres - in the warehouse layer.
+- Finally, transformations are made according to needs in the recommendations layer using dbt.
 
-|                Web               |           Mobile           |         Gaming         |          TV                |       Desktop & Server        |
-|:--------------------------------:|:--------------------------:|:----------------------:|:--------------------------:|:-----------------------------:|
-| [JavaScript][javascript-tracker] | [Android][android-tracker] | [Unity][unity-tracker] | [Roku][roku-tracker]       | [Command line][tracking-cli]  |
-| [AMP][amp-tracker]               | [iOS][ios-tracker]         | [C++][cpp-tracker]     | [iOS][ios-tracker]         | [.NET][dotnet-tracker]        |
-|                                  | [React Native][rn-tracker] | [Lua][lua-tracker]     | [Android][android-tracker] | [Go][golang-tracker]          |
-|                                  | [Flutter][flutter-tracker] |                        | [React Native][rn-tracker] | [Java][java-tracker]          |
-|                                  |                            |                        |                            | [Node.js][javascript-tracker] |
-|                                  |                            |                        |                            | [PHP][php-tracker]            |
-|                                  |                            |                        |                            | [Python][python-tracker]      |
-|                                  |                            |                        |                            | [Ruby][ruby-tracker]          |
-|                                  |                            |                        |                            | [Scala][scala-tracker]        |
-|                                  |                            |                        |                            | [C++][cpp-tracker]            |
-|                                  |                            |                        |                            | [Rust][rust-tracker]            |
-|                                  |                            |                        |                            | [Lua][lua-tracker]            |
+2. Bronze layer
 
-### [Collector](https://github.com/snowplow/stream-collector)
+![](./images/assets_bronze.png)
 
-### [Enrich](https://github.com/snowplow/enrich)
+Includes these assets:
 
-### Loaders
+- bronze_book: Table `book` from MySQL, because too large (over 1.2 million rows) it is partitioned by year from 1975 to 2022.
+- bronze_genre: Table `genre` from MySQL.
+- bronze_book_genre: Table `book_genre` from MySQL.
+- bronze_book_download_link: Table `book_download_link` from MySQL.
+- bronze_images_and_files_download: Đảm nhận việc kết nối tới google drive api, kéo file .epub và hình ảnh về, lưu trong datalake.
+- bronze_images_and_files_download: Responsible for connecting to the Google Drive API, pulling the .epub file and images, and storing them in the datalake.
 
-* [Redshift (batch)](https://github.com/snowplow/snowplow-rdb-loader)
-* [Snowflake (batch)](https://github.com/snowplow/snowplow-rdb-loader)
-* [Databricks (batch)](https://github.com/snowplow/snowplow-rdb-loader)
-* [BigQuery (streaming)](https://github.com/snowplow-incubator/snowplow-bigquery-loader)
-* [Google Cloud Storage (streaming)](https://github.com/snowplow-incubator/snowplow-google-cloud-storage-loader)
-* [Amazon S3 (streaming)](https://github.com/snowplow/snowplow-s3-loader)
-* [Postgres (streaming)](https://github.com/snowplow-incubator/snowplow-postgres-loader)
-* [Elasticsearch (streaming)](https://github.com/snowplow/snowplow-elasticsearch-loader)
+3. Silver layer
 
-### Iglu
+![](./images/assets_silver.png)
 
-* [Iglu Server](https://github.com/snowplow/iglu-server/)
-* [igluctl](https://github.com/snowplow/igluctl/)
-* [Iglu Central](https://github.com/snowplow/iglu-central/)
+Includes these assets:
 
-### Data modeling
+- silver_cleaned_book: Data cleaning from upstream `bronze_book`, partitioned to ensure `spark standalone mode` can run efficiently.
+- silver_collected_book: Collect missing data from upstream such as authors, pages number, and description from `OpenLibrary API`.
+- silver_isbn: Extract the isbn column from book to serve as a dependency for assets related to genre.
+- silver_cleaned_genre: Similar to `silver_cleaned_book`, but doesn't need partitioning as its size is not very large.
+- silver_collected_genre: Based on `silver_isbn`, collect missing genres for each book. If there is no genre, it cannot be used for recommendations in subsequent tasks.
+- silver_collected_book_genre: Establish the n-n relationship between book and genre.
 
-#### Web
+4. Gold layer
 
-* [Web model: SQL-Runner version](https://github.com/snowplow/data-models/tree/master/web/v1)
-* [Web model: dbt version](https://github.com/snowplow/dbt-snowplow-web)
+![](./images/assets_gold.png)
 
-#### Mobile
+Includes these assets:
 
-* [Mobile model: SQL-Runner version](https://github.com/snowplow/data-models/tree/master/mobile/v1)
-* [Mobile model: dbt version](https://github.com/snowplow/dbt-snowplow-mobile)
+- gold_genre: Compute and sort genres to match from upstream `silver_collected_genre`, while also saving them to minIO.
+- gold_book_genre: Similarly, from upstream `silver_collected_book_genre`.
+- gold_with_info: Splitting, containing only basic information about the book such as ISBN, Name, Authors, Language, PagesNumber.
+- gold_with_publish: Splitting, containing information about the publisher, publication time.
+- gold_with_rating: Splitting and computing different types of ratings.
 
-#### Media
+5. Warehouse layer
 
-* [Media model: dbt version](https://github.com/snowplow/dbt-snowplow-media-player)
+![](./images/assets_warehouse.png)
 
-#### Retail
+Load the assets from the gold layer into Postgres, including one asset from the bronze layer which is book_download_link.
 
-* [E-Commerce model: dbt version](https://github.com/snowplow/dbt-snowplow-ecommerce)
+In the future, the assets will be updated to add download links automatically from the Notion API, and a schedule will be set up.
 
-### Testing
+6. Transform layer
 
-* [Mini](https://github.com/snowplow/snowplow-mini)
-* [Micro](https://github.com/snowplow-incubator/snowplow-micro)
+![](./images/assets_dbt.png)
 
-### Parsing enriched event
+Includes these assets:
 
-* [Analytics SDK Scala](https://github.com/snowplow/snowplow-scala-analytics-sdk)
-* [Analytics SDK Python](https://github.com/snowplow/snowplow-python-analytics-sdk)
-* [Analytics SDK .NET](https://github.com/snowplow/snowplow-dotnet-analytics-sdk)
-* [Analytics SDK Javascript](https://github.com/snowplow-incubator/snowplow-js-analytics-sdk/)
-* [Analytics SDK Golang](https://github.com/snowplow/snowplow-golang-analytics-sdk)
+- search: Transform information to create an index table, which will be queried when users search for books.
+- search_prior: Also an index table, but contains books that are given priority based on factors such as availability of download links, functionality of the OpenLibrary API, high ratings, etc.
+- criteria: Criteria used to query related books when searching for a specific book.
 
-### [Bad rows](https://github.com/snowplow-incubator/snowplow-badrows)
+## 4. Setup
 
-### [Terraform Modules][terraform-modules]
+### 4.1 Prequisites
 
----
+To develop this pipeline, download and install these softwares:
 
-### Public Roadmap
+1. [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+2. [Docker](https://docs.docker.com/engine/install/) with at least 4GB RAM, 6 core CPU, 2GB swap, 16GB disk
+3. [CMake](https://cmake.org/install/), nếu dùng hệ máy UNIX (Linux/MacOS), check `make --version` already installed
+4. Python 3.x (3.9.16 recommended as the Spark image runs on this version, installing via asdf is recommended) and a virtual environment (pipenv recommended)
+5. A local machine that has freed the following ports: 3306, 5432, 9000, 9001, 3001, 8501, 4040, 7077, 8080, 3030
+6. Dbeaver or any other DB client (if not available, can use command-line)
 
-This repository also contains the [Snowplow Public Roadmap][roadmap]. The Public Roadmap lets you stay up to date and find out what's happening on the Snowplow Platform. Help us prioritize our cards: open the issue and leave a 👍 to vote for your favorites. Want us to build a feature or function? Tell us by heading to our [Discourse forum][discourse] 💬.
+If using Windows, set up WSL2 and a local Ubuntu virtual machine, then install the above software for Ubuntu.
 
-### Community 
+Clone the repository
 
-We want to make it super easy for Snowplow users and contributors to talk to us and connect with one another, to share ideas, solve problems and help make Snowplow awesome. Join the conversation:
+```bash
+git clone https://github.com/lelouvincx/goodreads-elt-pipeline.git project
+cd project
+```
 
-* **Meetups**. Don’t miss your chance to talk to us in person. We are often on the move with meetups in [Amsterdam](https://www.meetup.com/snowplow-analytics-amsterdam/), [Berlin](https://www.meetup.com/snowplow-analytics-berlin/), [Boston](https://www.meetup.com/snowplow-analytics-boston/), [London](https://www.meetup.com/snowplow-analytics-london/), and [more](https://www.meetup.com/topics/snowplow/all/).
-* **Discourse**. [Our forum](http://discourse.snowplowanalytics.com/) for all Snowplow users: engineers setting up Snowplow, data modelers structuring the data, and data consumers building insights. You can find guides, recipes, questions and answers from Snowplow users and the Snowplow team. All questions and contributions are welcome!
-* **Twitter**. Follow [@Snowplow](https://twitter.com/snowplow) for official news and [@SnowplowLabs](https://twitter.com/snowplowlabs) for engineering-heavy conversations and release announcements.
-* **GitHub**. If you spot a bug, please raise an issue in the GitHub repository of the component in question. Likewise, if you have developed a cool new feature or an improvement, please open a pull request, we’ll be glad to integrate it in the codebase! For brainstorming a potential new feature, [Discourse](http://discourse.snowplowanalytics.com/) is the best place to start.
-* **Email**. If you want to talk to Snowplow directly, email is the easiest way. Get in touch at community@snowplowanalytics.com.
+Download the csv dataset [here](https://www.kaggle.com/datasets/lelouvincx/goodreads-elt-pipeline?select=book.csv), then place it in `project/dataset`
 
----
+### 4.2 Setup google drive api
 
-### Copyright and license
+Firstly we need to create an OAuth 2.0 token to google, [Google API Console](https://console.developers.google.com/).
 
-Snowplow is copyright 2012-2023 Snowplow Analytics Ltd.
+Select `create new project`:
 
-Licensed under the **[Apache License, Version 2.0][license]** (the "License");
-you may not use this software except in compliance with the License.
+![](./images/gdrive_1.png)
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Fill in project's name (goodreads-elt_pipeline), choose location (default `No organization`).
 
-[license-image]: https://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
-[license]: https://www.apache.org/licenses/LICENSE-2.0
+![](./images/gdrive_2.png)
 
-[logo-image]: media/snowplow_logo.png
-[website]: https://snowplowanalytics.com
-[docs]: https://docs.snowplowanalytics.com/open-source-docs/
+After creating project, select tab `Library`:
 
-[snowplow-bdp]: https://snowplowanalytics.com/products/snowplow-bdp/
-[version-compatibility]: https://docs.snowplowanalytics.com/docs/pipeline-components-and-applications/version-compatibility-matrix/
-[try-snowplow]: https://try.snowplowanalytics.com/?utm_source=github&utm_medium=post&utm_campaign=try-snowplow&utm_content=main-repo
-[roadmap]: https://github.com/snowplow/snowplow/projects
-[terraform-modules]: https://registry.terraform.io/modules/snowplow-devops
+![](./images/gdrive_3.png)
 
-[architecture-image]: media/snowplow_architecture.png
-[architecture]: ./ARCHITECTURE.md
+Search `Google Drive API`, enable it.
 
-[trackers]: https://github.com/snowplow/snowplow/tree/master/1-trackers
-[collector]: https://github.com/snowplow/snowplow/tree/master/2-collectors
-[enrich]: https://github.com/snowplow/snowplow/tree/master/3-enrich
-[storage]: https://github.com/snowplow/snowplow/tree/master/4-storage
-[data-modeling]: https://github.com/snowplow/snowplow/tree/master/5-data-modeling
-[analytics-sdks]: https://docs.snowplowanalytics.com/docs/modeling-your-data/analytics-sdk/
+![](./images/gdrive_4.png)
 
-[split-blogpost]: https://snowplowanalytics.com/blog/2020/07/16/changing-releasing/
-[submodules]: https://git-scm.com/book/en/v2/Git-Tools-Submodules
+![](./images/gdrive_5.png)
 
-[discourse-image]: https://img.shields.io/discourse/posts?server=https%3A%2F%2Fdiscourse.snowplowanalytics.com%2F
-[discourse]: http://discourse.snowplowanalytics.com/
+Next, select tab `OAuth consent screen`,
 
-[release]: https://github.com/snowplow/snowplow/releases/tag/22.01
-[release-badge]: https://img.shields.io/badge/Snowplow-22.01%20Western%20Ghats-6638b8
+![](./images/gdrive_6.png)
 
-[javascript-tracker]: https://github.com/snowplow/snowplow-javascript-tracker
-[amp-tracker]: https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/google-amp-tracker/
-[android-tracker]: https://github.com/snowplow/snowplow-android-tracker
-[ios-tracker]: https://github.com/snowplow/snowplow-objc-tracker
-[rn-tracker]: https://github.com/snowplow-incubator/snowplow-react-native-tracker
-[roku-tracker]: https://github.com/snowplow-incubator/snowplow-roku-tracker
-[flutter-tracker]: https://github.com/snowplow-incubator/snowplow-flutter-tracker
-[tracking-cli]: https://github.com/snowplow/snowplow-tracking-cli
-[dotnet-tracker]: https://github.com/snowplow/snowplow-dotnet-tracker
-[golang-tracker]: https://github.com/snowplow/snowplow-golang-tracker
-[java-tracker]: https://github.com/snowplow/snowplow-java-tracker
-[php-tracker]: https://github.com/snowplow/snowplow-php-tracker
-[python-tracker]: https://github.com/snowplow/snowplow-python-tracker
-[ruby-tracker]: https://github.com/snowplow/snowplow-ruby-tracker
-[scala-tracker]: https://github.com/snowplow/snowplow-scala-tracker
-[unity-tracker]: https://github.com/snowplow/snowplow-unity-tracker
-[cpp-tracker]: https://github.com/snowplow/snowplow-cpp-tracker
-[rust-tracker]: https://github.com/snowplow/snowplow-rust-tracker
-[lua-tracker]: https://github.com/snowplow/snowplow-lua-tracker
+Fill in below information:
+
+![](./images/gdrive_7.png)
+
+In `scopes`, select `add or remove scopes`, look for `google drive api, readonly` then tick, `save and continue` until end.
+
+![](./images/gdrive_8.png)
+
+Select tab `credentials` -> `create credentials` then `OAuth client ID`.
+
+![](./images/gdrive_9.png)
+
+Select `Desktop app`, name as you like (default: goodreads-elt-pipeline)
+
+![](./images/gdrive_10.png)
+
+Download json and place in `project/elt_pipeline/elt_pipeline`
+
+![](./images/gdrive_11.png)
+
+### 4.3 Setup local infrastructure
+
+Clone repository:
+
+```bash
+# Create env file
+touch .env
+cp env.template .env
+touch .spark_master.env
+cp spark_master.env.template .spark_master.env
+touch .spark_worker.env
+cp spark_worker.env.template .spark_worker.env
+```
+
+Then fill in the infomation into the above env files, for examples:
+
+```env
+# MySQL
+MYSQL_HOST=de_mysql
+MYSQL_PORT=3306
+MYSQL_DATABASE=goodreads
+MYSQL_USER=admin
+MYSQL_PASSWORD=admin123
+MYSQL_ROOT_PASSWORD=root123
+
+# PostgreSQL
+POSTGRES_HOST=de_psql
+POSTGRES_PORT=5432
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin123
+POSTGRES_DB=goodreads
+POSTGRES_HOST_AUTH_METHOD=trust
+
+# Google Drive
+GDRIVE_CLIENT_SECRET_FILE=client_secret.json
+GDRIVE_PICKLE_FILE=token_drive_v3.pickle
+GDRIVE_API_NAME=drive
+GDRIVE_API_VERSION=v3
+GDRIVE_SCOPES=https://www.googleapis.com/auth/drive.readonly
+
+# Dagster
+DAGSTER_PG_HOSTNAME=de_psql
+DAGSTER_PG_USERNAME=admin
+DAGSTER_PG_PASSWORD=admin123
+DAGSTER_PG_DB=postgres
+DAGSTER_OVERALL_CONCURRENCY_LIMIT=1
+DAGSTER_HOME=/opt/dagster/dagster_home
+
+# dbt
+DBT_HOST=de_psql
+DBT_USER=admin
+DBT_PASSWORD=admin123
+DBT_DATABASE=goodreads
+DBT_SCHEMA=recommendations
+# MinIO
+MINIO_ENDPOINT=minio:9000
+MINIO_ROOT_USER=minio
+MINIO_ROOT_PASSWORD=minio123
+MINIO_ACCESS_KEY=minio
+MINIO_SECRET_KEY=minio123
+DATALAKE_BUCKET=lakehouse
+AWS_ACCESS_KEY_ID=minio
+AWS_SECRET_ACCESS_KEY=minio123
+AWS_REGION=us-east-1
+
+# MinIO client (mc)
+AWS_ACCESS_KEY_ID=minio
+AWS_SECRET_ACCESS_KEY=minio123
+AWS_REGION=us-east-1
+
+# Spark
+SPARK_MASTER_URL=spark://spark-master:7077
+SPARK_VERSION=3.3.2
+HADOOP_VERSION=3
+
+# Metabase
+MB_DB_TYPE=postgres
+MB_DB_DBNAME=goodreads
+MB_DB_PORT=5432
+MB_DB_USER=admin
+MB_DB_PASS=admin123
+MB_DB_HOST=de_psql
+MB_DB_FILE=/metabase_data/metabase.db
+```
+
+You can replace the infomation about user, password, ...
+
+**For development only, do not use for production.**
+
+```bash
+# DO NOT RUN BOTH BELOW COMMANDS, ONLY CHOOSE ONE
+# Setup python environment
+pipenv install
+# Or create virtualenv and install manually by requirements.txt
+make install
+
+# Build docker images
+make build-dagster
+make build-spark
+make build-pipeline
+make build-streamlit
+
+# Run containers dettached
+make up-bg
+
+# Check running containers
+docker compose ps -a
+
+# Check code quality
+make check
+make lint
+
+# Format pipelines
+black ./elt_pipeline
+
+# Test coverage
+make test
+```
+
+Check there's 11 running services:
+
+![](./images/docker_1.png)
+
+![](./images/docker_2.png)
+
+**Ports**:
+
+- MySQL: 3306
+- PostgreSQL: 5432
+- Dagit: 3001
+- MinIO
+  - UI: 9001
+  - API: 9000
+- Spark master:
+  - UI: 8080
+  - API: 7077
+- Pipeline:
+  - Spark jobs running: 4040
+- Metabase: 3030
+- Streamlit: 8501
+
+### 4.4 Import data into MySQL
+
+Now we import the Goodreads dataset (unser csv format) into MySQL:
+
+```bash
+make to_mysql_root
+```
+
+```sql
+SET GLOBAL local_infile=TRUE;
+-- Check if local_infile was turned on
+SHOW VARIABLES LIKE "local_infile";
+exit
+```
+
+```bash
+# Create tables with schema
+make mysql_create
+
+# Load csv into created tables
+make mysql_load
+```
+
+### 4.5 Create schema in Postgres
+
+```bash
+make psql_create
+```
+
+### 4.6 User interfaces
+
+1. <http://localhost:3001> - Dagit
+2. <http://localhost:4040> - Spark jobs
+3. <http://localhost:8080> - Spark master
+4. <http://localhost:9001> - MinIO
+5. <http://localhost:3030> - Metabase
+6. <http://localhost:8501> - Streamlit
+
+## 5. Considerations
+
+Evaluation of the project:
+
+1. Speed: `spark` is installed in standalone mode, so it does not achieve high performance and sometimes crashes in the middle of performing shuffle/read/write tasks.
+2. Development environment: Currently, there is only a development environment, and in the future, testing, staging, and production environments will be considered.
+3. `dbt` is currently a small project, and in the future, if more transformations are needed, it should be split into separate services with different permissions.
+4. Deployment: Using one of the cloud computing services such as AWS, Azure, GCP.
+
+## 6. Further actions
+
+1. Complete the recommender system
+2. Integrate Jupyter Notebook for DS tasks - [dagstermill](https://docs.dagster.io/integrations/dagstermill)
+3. Testing environment
+4. Continuous Integration with Github Actions
