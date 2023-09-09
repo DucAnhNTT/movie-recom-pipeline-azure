@@ -22,7 +22,7 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
 * Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
 * Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs).
 * Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks).
-* Orchestration the data in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
+* Orchestration the data pipeline in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
 * And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Key Vault](https://azure.microsoft.com/en-us/products/key-vault)...
 
 
