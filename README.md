@@ -1,4 +1,4 @@
-![](./Images/movieRecImg.jpg)
+![](./Images/movieRecImg.pnj)
 
 ## Overview
 This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. 
