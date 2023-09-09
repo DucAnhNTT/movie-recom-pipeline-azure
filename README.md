@@ -1,15 +1,11 @@
-![](./Images/movieRecImg.jpg)
+# Movie recommendation data pipeline with Azure
 
-## Overview
-This is a project using Azure services for building a complete Data pipeline for Movie Recommendation. 
-* Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
-* Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs) with variety ways of replication and storage type.
-* Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks) which run the Apache Spark open-source big data processing engine .
-* Orchestration the data in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory) a cloud-based data integration service that allows you to create data-driven workflows in the cloud.
-* And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview) for running automated workflows with little to no code, typically in this project is send email for you about the recommendation about movies, [Key Vault](https://azure.microsoft.com/en-us/products/key-vault) for storaging you indentify secrets.
+**Movie recommendation data pipeline with Azure** In this project i will help you to build a complete Data pipeline for Movie Recommendation using Azure services. 
 
 ### Table of contents
 
+* [Architecture diagram](#architecture-diagram)
+* [Overview](#Overview)
 * [Why Azure?](#why-azure)
 * [Design](#Design)
 * [Snowplow technology 101](#snowplow-technology-101)
@@ -18,44 +14,30 @@ This is a project using Azure services for building a complete Data pipeline for
 * [Public roadmap](#public-roadmap)
 * [Community](#community)
 
-### Why Azure?
+## Architecture diagram
 
+![](./Images/movieRecImg.jpg)
+
+## Overview
+* Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
+* Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs).
+* Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks).
+* Orchestration the data in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
+* And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Key Vault](https://azure.microsoft.com/en-us/products/key-vault)...
+
+
+### Why Azure?
 *  For me it kind of simple because [Azure](https://azure.microsoft.com/en-us/free/students) gives free credits for new user, and can access all the services (In this project i use my email of my university and get free $100 credits without Visa or debit card, but you have to use your external email, not organization and verify by you org email, i have to spend somedays to figure it out, and don't use Databricks community for purpose of this project)
-* Plenty of resources to learn from, 
+* And ofoursce, plenty of resources to learn from...
 
 ## Design
 
-### 3.1 Directory tree
+###  Data Scraping
+Airflow DAG is responsible for the execution of Python scraping modules.
+It runs periodically every X minutes producing micro-batches.
+- First task updates **proxypool**. Using proxies in combination with rotating user agents can help get scrapers past most of the anti-scraping measures and prevent being detected as a scraper.
 
-![](./images/directory_tree.png)
-
-- `app`: The UI's application written with streamlit
-- `dagster_home`: Dagit and dagster daemon's configurations
-- `dataset`: Dataset under .csv format, in order to load into MySQL
-- `docker-compose`: To compose docker containers
-- `dockerimages`: Include self-built docker images, such as dagster (for dagit + daemon), spark master, streamlit app, ...
-- `EDA.ipynb`: Exploratory Data Analysis, view directly [here](https://gist.github.com/lelouvincx/a88fa6caf59d7ff76086ab485ecc69bd)
-- `elt_pipeline`: The pipeline
-  - `dbt_transform`: dbt's code location, used for the last transform step
-  - `Dockerfile + requirements.txt`: Docker image
-  - `elt_pipeline`: EL (Extract -> Transform) pipeline
-- `.env + .spark_master.env + .spark_worker.env`: Env variables (e.g POSTGRES_USER, MYSQL_USER, SPARK, ...)
-- `env.template`: Env variables template
-- `.git + .gitignore`: Code versioning
-- `Makefile`: Shortcut for terminal's commands
-- `load_dataset`: .sql scripts to create schema and load `dataset` into MySQL, Postgres
-- `requirements.txt + Pipfile + Pipfile.lock`: Python's dependencies
-
-In addition, the containers also have their own separate directories, which include:
-
-- `minio`
-- `storage`
-  - `mysql_data`
-  - `postgres_data`
-  - `metabase_data`
-
-Visit file [tree.txt](https://github.com/lelouvincx/goodreads-elt-pipeline/blob/main/tree.txt) for more details.
-
+- Second task extracts news from RSS feeds provided in the configuration file, validates the quality and sends data into **Kafka topic A**. The extraction process is using validated proxies from **proxypool**.
 ### 3.2 Pipeline design
 
 ![](./images/design_pipeline.png "Pipeline Design")
