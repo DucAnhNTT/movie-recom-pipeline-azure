@@ -1,6 +1,6 @@
-# Movie recommendation data pipeline with Azure
+# Movie recommend data pipeline with Azure
 
-**Movie recommendation data pipeline with Azure** In this project i will help you to build a complete Data pipeline for Movie Recommendation using Azure services. 
+In this project i will help you to build a complete Data pipeline for Movie Recommendation using Azure services. 
 
 ### Table of contents
 
