@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Movie recommendation data pipeline with Azure
+=======
+![](./Images/movieRecImg.png)
+>>>>>>> e57412d5e2a696e97b6ad0cf075e622701e93f65
 
 **Movie recommendation data pipeline with Azure** In this project i will help you to build a complete Data pipeline for Movie Recommendation using Azure services. 
 
