@@ -5,7 +5,7 @@
 ### Table of contents
 
 * [Architecture diagram](#architecture-diagram)
-* [Overview](#Overview)
+* [Overview](#overview)
 * [Why Azure?](#why-azure)
 * [Design](#Design)
 * [Snowplow technology 101](#snowplow-technology-101)
