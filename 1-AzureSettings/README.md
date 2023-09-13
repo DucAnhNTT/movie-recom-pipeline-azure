@@ -25,8 +25,12 @@
 ![](/1-AzureSettings/storageaccount.png)
 
 * There several things you have to pick here
+  <br>
  ** Region: You should pick where you at for the convenient and reduce delay time
+   <br>
  ** Performance: For this project you can go for standard (and i think most people use it)
+   <br>
  ** Redundancy: Where the data should be replicated at
+   <br>
 * WARNING: You should choose hiearachy namespace in the Advanced Settings for easily access to your data like on you PC
 ![](/1-AzureSettings/storageaccount-register.png) 
