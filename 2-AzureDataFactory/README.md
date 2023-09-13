@@ -78,5 +78,5 @@
     "type": "object"
 }
 
-![](./2-AzureDataFactory/image/LogicApp.png)
+![](/2-AzureDataFactory/LogicApp.png)
 
