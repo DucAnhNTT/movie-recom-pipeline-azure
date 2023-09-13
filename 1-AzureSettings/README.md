@@ -28,4 +28,4 @@
  ** Performance: For this project you can go for standard (and i think most people use it)
  ** Redundancy: Where the data should be replicated at
 
-![](./1-AzureSettings/image/storageaccount-register.png) --c
+![](./1-AzureSettings/image/storageaccount-register.png) 

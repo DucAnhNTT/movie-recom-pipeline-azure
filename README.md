@@ -60,13 +60,15 @@ What you need to run the project:
 - There's two way to run this project:
 
     -- First one is use can trigger the pipeline in **Azure DataFactory** with the ETL and mounting pre-defined.
+
+    <br>
     -- Second one is the pipeline have been automated trigger whenever there's a file upload in to the specific location.
 
 - First way using manually trigger:  
   ![](./Images/datafactory.png)
 
 - Second way load the file to **Blob storage**:
-  ![](./Images/triggerwhenfilecomeADF.png)
+  ![](./Images/triggerwhenfilecomADF.png)
 
 <!-- REFERENCES -->
 ## References
@@ -78,7 +80,7 @@ Inspired by following codes, articles and videos:
 
 ## Demo
 - Link to the Demo:  
-  ![Link](https://www.youtube.com/playlist?list=PLId1IInL1tup-76xOBJcgUi2A5fy2eGTc)
+  [Link](https://www.youtube.com/playlist?list=PLId1IInL1tup-76xOBJcgUi2A5fy2eGTc)
 
 
 <!-- CONTACT -->
