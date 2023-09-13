@@ -46,12 +46,12 @@
     -- In the If true activity we send the Successful File data to Azure Databricks notebook for computing
 
     -- In the If False activity we send back the Failed file to Sink, which is rejected file we created in Blob storage
-
+![](/2-AzureDataFactory/if.png)
+![](/2-AzureDataFactory/iftrue.png)
 # Create Azure Logic App
 
 * We need to create the Azure Logic App for the last stage of the ADF pipeline, this typically invole when the If true stage send the data file to the Azure DataBricks for computing, we need to take the result back, and the result have to in structure we denfine
-![](/2-AzureDataFactory/if.png)
-![](/2-AzureDataFactory/iftrue.png)
+
 
 * Warning: We have to mount the URL of the last stage which is Web: Success and Fail Email to the URL of the Azure Logic App
 
