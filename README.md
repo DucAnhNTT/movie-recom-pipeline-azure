@@ -7,8 +7,7 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
 * [Architecture diagram](#architecture-diagram)
 * [Overview](#overview)
 * [Why Azure?](#why-azure)
-* [Design](#Design)
-* * [How it works](#how-it-works)
+* [How it works](#how-it-works)
     * [Data ingestion](#data-ingestion)
     * [Data flow](#data-flow)
     * [Data access](#data-access)
@@ -67,7 +66,7 @@ What you need to run the project:
   ![](./Images/datafactory.png)
 
 - Second way load the file to **Blob storage**:
-  ![](./Images/triggerwhenfilecomeADF>png)
+  ![](./Images/triggerwhenfilecomeADF.png)
 
 <!-- REFERENCES -->
 ## References
@@ -76,6 +75,11 @@ Inspired by following codes, articles and videos:
 * [Amazing tutor, and a youtuber providing such details video](https://github.com/yourhadooptutor)
 * [Document and answers by Microsoft](https://azure.microsoft.com/en-us/)
 * [Mounting and configuration on your choice](https://www.youtube.com/watch?v=8YL8T0kw75M)
+
+## Demo
+- Link to the Demo:  
+  ![Link](https://www.youtube.com/playlist?list=PLId1IInL1tup-76xOBJcgUi2A5fy2eGTc)
+
 
 <!-- CONTACT -->
 ## Contact
