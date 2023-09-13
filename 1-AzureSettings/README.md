@@ -19,7 +19,8 @@
 
 ## Storage account
 * Here is the physical store for your file(or resources). There plenty of settings in here, but tbh it quite easily to understand. Let's go through with me!
- -- WARNING: You should choose hiearachy namespace for easily access to your data like on you PC
+
+
 
 ![](/1-AzureSettings/storageaccount.png)
 
@@ -27,5 +28,5 @@
  ** Region: You should pick where you at for the convenient and reduce delay time
  ** Performance: For this project you can go for standard (and i think most people use it)
  ** Redundancy: Where the data should be replicated at
-
+* WARNING: You should choose hiearachy namespace in the Advanced Settings for easily access to your data like on you PC
 ![](/1-AzureSettings/storageaccount-register.png) 
