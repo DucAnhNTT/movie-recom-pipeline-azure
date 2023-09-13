@@ -8,11 +8,13 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
 * [Overview](#overview)
 * [Why Azure?](#why-azure)
 * [Design](#Design)
-* [Snowplow technology 101](#snowplow-technology-101)
-* [Version compatibility matrix](#version-compatibility-matrix)
-* [About this umbrella repository](#about-this-repository)
-* [Public roadmap](#public-roadmap)
-* [Community](#community)
+* * [How it works](#how-it-works)
+    * [Data ingestion](#data-ingestion)
+    * [Data flow](#data-flow)
+    * [Data access](#data-access)
+* [Prerequisites](#prerequisites)
+* [References](#references)
+* [Contact](#contact)
 
 ## Architecture diagram
 
@@ -27,7 +29,7 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
 
 
 ### Why Azure?
-*  For me it kind of simple because [Azure](https://azure.microsoft.com/en-us/free/students) gives free credits for new user, and can access all the services (In this project i use my email of my university and get free $100 credits without Visa or debit card, but you have to use your external email, not organization and verify by you org email, i have to spend somedays to figure it out, and don't use Databricks community for purpose of this project)
+*  For me it kind of simple because [Azure](https://azure.microsoft.com/en-us/free/students) gives free credits for new user, and can access all the services (In this project i use my email of my university and get free $100 credits without Visa or debit card)
 * And of course, plenty of resources to learn from...
 
 ## How it works
@@ -57,20 +59,21 @@ What you need to run the project:
 <!-- RUNNING PROJECT -->
 ## Running project
 - There's two way to run this project:
-  -- First one is use can trigger the pipeline in **Azure DataFactory** with the ETL and mounting pre-defined.
-  -- Second one is the pipeline have been automated trigger whenever there's a file upload in to the specific location.
+
+    -- First one is use can trigger the pipeline in **Azure DataFactory** with the ETL and mounting pre-defined.
+    -- Second one is the pipeline have been automated trigger whenever there's a file upload in to the specific location.
 
 - First way using manually trigger:  
-  ![](./Images/movieRecImg.png)
+  ![](./Images/datafactory.png)
 
 - Second way load the file to **Blob storage**:
-  ![](./Images/movieRecImg.png)
+  ![](./Images/triggerwhenfilecomeADF>png)
 
 <!-- REFERENCES -->
 ## References
 Inspired by following codes, articles and videos:
 
-* [Amazing tutor](https://github.com/yourhadooptutor)
+* [Amazing tutor, and a youtuber providing such details video](https://github.com/yourhadooptutor)
 * [Document and answers by Microsoft](https://azure.microsoft.com/en-us/)
 * [Mounting and configuration on your choice](https://www.youtube.com/watch?v=8YL8T0kw75M)
 
