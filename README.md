@@ -13,6 +13,7 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
     * [Data access](#data-access)
 * [Prerequisites](#prerequisites)
 * [References](#references)
+* [Demo](#demo)
 * [Contact](#contact)
 
 ## Architecture diagram
