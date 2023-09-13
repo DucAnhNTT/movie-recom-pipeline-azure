@@ -9,7 +9,7 @@
 ## Your Azure account
 * Create your Azure account (if you new, you can get $300 free credits for new user, i'm using student account and get $100)
 
-![](./1-AzureSettings/image/createaccount.png)
+![](/1-AzureSettings/createaccount.png)
 
 ## Resource group
 * Imaging Resource Group is just a logical store for your needed file for a specific project, so you can easily find, and interact with the file.
