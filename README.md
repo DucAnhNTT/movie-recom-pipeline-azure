@@ -39,7 +39,13 @@ Ingest the data we have, thanks for [Movielens](https://grouplens.org/datasets/m
 
 - First task, we need to create a [Resource Group](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal), A resource group is a container that holds related resources for an Azure solution.
 
-- Second task, we need somewhere to store the actual data, we pick [Storage Account](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
+- Within the Resource Group, create an "Azure Storage Account" to store your data files. Choose the type of storage (e.g., Blob storage) and specify the region for the storage account. Blob storage is suitable for storing unstructured data like movie data files (e.g., CSV files).
+  
+- Upload your movie data files to the Blob storage containers within the Azure Storage Account.
+These files will be stored securely and can be accessed by Azure services for further processing and analysis.
+
+- Configure Azure services such as Azure Data Factory or Azure Databricks to access and process the data stored in the Azure Storage Account.
+These services can perform tasks like data transformations, ETL operations, and generating movie recommendations.
 
 #### Data flow
 - Raw data ingest to **Azure Blob storage**, we can trigger the pipeline run whenever the data come (I will show you later).
