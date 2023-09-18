@@ -25,7 +25,7 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
 * Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs).
 * Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks).
 * Orchestration the data pipeline in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
-* And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Key Vault](https://azure.microsoft.com/en-us/products/key-vault)...
+* And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Azure Active Directory](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Key Vault](https://azure.microsoft.com/en-us/products/key-vault)...
 
 
 ### Why Azure?
@@ -43,8 +43,9 @@ Ingest the data we have, thanks for [Movielens](https://grouplens.org/datasets/m
 
 #### Data flow
 - Raw data ingest to **Azure Blob storage**, we can trigger the pipeline run whenever the data come (I will show you later).
-- Then we orchestrate the ETL using **Azure DataFactory**, we transform using **Azure Databricks** and get the validated data and rejected data.
-- Addtionally, I will show you how to use **Key Vault** to store you identify, and use that to mount the services with each others
+- We transform using **Azure Databricks** and get the validated data and rejected data.
+- Then we orchestrate the ETL using **Azure DataFactory**,
+- Addtionally, I will show you how to use **Key Vault** to store you identify, and use that to mount the services with each others.
 - Eventually the notebook we run in **Azure Databricks** give outs the result to us, then we have **Azure Logic App** send the movie recommendation to us.
 
 #### Data access
