@@ -1,8 +1,8 @@
 # Movie recommend data pipeline with Azure
+This project provides a hands-on experience of building a complete data pipeline using Azure services and implementing a machine learning model for movie recommendations. It is an excellent opportunity for me to understand the practical aspects of data engineering and machine learning.
 
 In this project, we will build a comprehensive data pipeline for a movie recommendation system using Azure services. The recommendation system is developed using collaborative filtering and PySpark ML, which is a machine learning library in Spark.
 
-This project provides a hands-on experience of building a complete data pipeline using Azure services and implementing a machine learning model for movie recommendations. It is an excellent opportunity for me to understand the practical aspects of data engineering and machine learning.
 ### Table of contents
 
 * [Architecture diagram](#architecture-diagram)
