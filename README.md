@@ -1,7 +1,8 @@
 # Movie recommend data pipeline with Azure
 
-In this project i will help you to build a complete Data pipeline for Movie Recommendation using Azure services. 
+In this project, we will build a comprehensive data pipeline for a movie recommendation system using Azure services. The recommendation system is developed using collaborative filtering and PySpark ML, which is a machine learning library in Spark.
 
+This project provides a hands-on experience of building a complete data pipeline using Azure services and implementing a machine learning model for movie recommendations. It is an excellent opportunity for me to understand the practical aspects of data engineering and machine learning.
 ### Table of contents
 
 * [Architecture diagram](#architecture-diagram)
@@ -21,11 +22,12 @@ In this project i will help you to build a complete Data pipeline for Movie Reco
 ![](./Images/movieRecImg.png)
 
 ## Overview
-* Datasets from [Movielens](https://grouplens.org/datasets/movielens/)(with the rating and movie up to 25M).
-* Store the data in [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs).
-* Transformation using [Azure Databricks](https://azure.microsoft.com/en-us/products/databricks).
-* Orchestration the data pipeline in [Azure DataFactory](https://azure.microsoft.com/en-us/products/data-factory).
-* And several components [Azure Logic App](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Azure Active Directory](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview),[Key Vault](https://azure.microsoft.com/en-us/products/key-vault)...
+*   We will use the datasets from Movielens, which includes ratings and movie data up to 25M records.
+*   The data will be stored in Azure Blob Storage, a scalable and secure data storage solution.
+*   The data transformation process will be handled by Azure Databricks, a fast, easy, and collaborative Apache Spark-based analytics platform.
+*   The data pipeline will be orchestrated in Azure DataFactory, a cloud-based data integration service.
+*   Additional components like Azure Logic App, Azure Active Directory, and Key Vault will be used for automation, security, and identity management.
+*   The model will be trained and tested on a large dataset, achieving a RMSE of 0.814 on the test set. The system will be capable of recommending the top 10 movies for a given user.
 
 
 ### Why Azure?
